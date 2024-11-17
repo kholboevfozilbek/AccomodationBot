@@ -1,4 +1,46 @@
 import telebot
+import sqlite3
+import threading
+
+# Create a connection to the SQLite database
+conn = sqlite3.connect('users.db', check_same_thread=False)
+cursor = conn.cursor()
+
+# Create a table to store hosts if it doesn't exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS hosts (
+        host_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT NOT NULL, 
+        last_name TEXT NOT NULL,
+        id_pass BLOB NOT NULL,
+        contact_phone TEXT NOT NULL, 
+        contact_email TEXT
+    )
+''')
+
+# Create a table to store guests if it doesn't exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS guests (
+        guest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT NOT NULL, 
+        last_name TEXT NOT NULL,
+        contact_phone TEXT NOT NULL, 
+        contact_email TEXT
+    )
+''')
+
+# Create a table to store admin if it doesn't exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS admin (
+        admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT NOT NULL, 
+        last_name TEXT NOT NULL,
+        contact_phone TEXT NOT NULL, 
+        contact_email TEXT
+    )
+''')
+
+conn.commit()
 
 BOT_TOKEN = "7581557841:AAG_dusuxWwEk0aZfGLTWZ6fIektZeFajQQ"
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -13,14 +55,16 @@ user_state = {}
 # Команда для добавления жилья
 @bot.message_handler(commands=['add_accommodation'])
 def add_accommodation(message):
-    user_id = message.from_user.id
+    host_id = message.from_user.id
+    host_name = message.from_user.first_name
+
     user_state[user_id] = {"step": "name"}
     bot.send_message(message.chat.id, "Please enter the name of the accommodation:")
 
 
 @bot.message_handler(func=lambda message: message.from_user.id in user_state)
 def process_accommodation_data(message):
-    user_id = message.from_user.id
+    host_id = message.from_user.id
     state = user_state.get(user_id)
 
     if state["step"] == "name":
@@ -49,6 +93,11 @@ def process_accommodation_data(message):
             "price": state["price"],
             "tags": state["tags"]
         })
+
+        # we need to start handing for adding the user to the db table
+        cursor.execute('INSERT INTO hosts (host_id, goal, completed) VALUES (?, ?, 0)', (user_id, goal))
+        conn.commit()
+
         bot.send_message(message.chat.id, "Accommodation successfully added!")
         user_state.pop(user_id)
 
