@@ -1,0 +1,79 @@
+/search
+
+1. filter + Personalized expertise
+
+* [initizlizing the communication]:  /need_apartment /looking_apartment 
+* [location] : "Any location in mind?" -> GPS pointing selection
+	* country? - city? - parts_of_city? - near_to_facility?
+* [price] : "Any price range in mind choose min to max levels?
+* [parameters]: smoking? pets? is children allowed? is partying? is music allowed?
+* [facilities]: washing machine? dryer? car parking? iron? TV? Rooms? Bedrooms?
+* [availability]: is it free or not?
+
+
+
+
+/add
+
+1. adding manually ourselves
+2. API call from real external servers
+3. have 'hosts' list places and then we approving
+
+/rent - they do not pay us
+
+
+DATA MANAGEMENT: 
+users: hosts{sign_up + authenticate}, guests
+
+places: 
+place_id
+host_id_foreign
+country, 
+city, 
+municiplaity, 
+street, 
+building number, 
+postcode, 
+house number
+size,
+kitchen {
+	separate: 1
+	shared: 1
+	equipment: ["fridge", "oven", "microwave", "stove", "pressure cooker", "pans"]
+}
+bathroom: 1
+garden: 1
+receptionist/security: 1
+price,
+rooms, 
+
+parameters: balcony? 
+smoking, 
+pets, 
+music/party,
+ 
+facilities: 
+washing machine, 
+dryer, 
+parking, 
+iron, 
+TV,
+furniture,
+
+access: 
+nearest bus,
+nearest tram,
+nearest train stations,
+nearest groceries stores?
+landmark? city_centre? outside_city?, 
+photos
+availability:
+
+database table
+images:
+#	#		#	#
+id	unique name	BLOB	place_id
+	(id+street+building_number+house_number)
+
+
+

@@ -1,0 +1,78 @@
+[
+    {
+        "place-id": 1,
+        "host-id": 1,
+        "country": "Poland",
+        "city": "Lodz",
+        "municipality": {
+            "district": "Srodmiescie",
+            "part": "Radiostacja"
+        },
+        "street": "Lumumby",
+        "building-number": "16/18",
+        "postcode": "91-404",
+        "house-number": "135",
+        "floor": 1,
+        "type": "dormitory",
+        "size": "40m2",
+        "price": {
+            "base": 570,
+            "deposit": 1040,
+            "additional-fees": 0,
+            "additional-fees-list": {
+                "utilities": 0,
+                "internet": 0
+            }
+        },
+        "rooms": 2,
+        "room-equipment": ["TV", "Wardrobe", "Bathroom", "Furniture", "Washing Machine", "Gym", "Meeting Hall"],
+        "kitchen": {
+            "separate": 1,
+            "shared": 1,
+            "equipment": ["fridge", "oven", "microwave", "stove", "pans"]
+        },
+        "bathroom": {
+            "shared": 0
+        },
+        "garden": 1,
+        "reception_security": 1,
+        "balcony": 0,
+        "smoking": 0,
+        "pets": 0,
+        "music-party": 1,
+        "parking": {
+            "available": 1,
+            "price": 0,
+            "type": "outdoor"
+        },
+        "near-bus-lines": {
+            "address": "Pmorska",
+            "lines": ["86", "87A", "87B"],
+            "distance": "250"
+        },
+        "near-tram-lines": {
+            "address": "Pomorska-Tamka(0849)",
+            "lines": [17, 45, 15],
+            "distance": "600"
+        },
+        "near-train-station": {
+            "Fabryczna": "2400"
+        },
+        "near-touristic-places": {
+            "Manufactura": "3000",
+            "Piotrkowska": "3500",
+            "Poznanski Palace": "2800"
+        },
+        "near-groceries-stores": {
+            "Biedronka": "400",
+            "Zabka": "200",
+            "Lidl": "500"
+        },
+        "tags": ["city_centre", "campus university"],
+        "features": ["heating floor", "elevator"],
+        "added-date": "04.12.2024",
+        "update-date": "04.12.2024",
+        "verified": 0,
+        "available": 1
+    }
+]

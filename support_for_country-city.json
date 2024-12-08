@@ -1,0 +1,90 @@
+[
+  {
+    "country": "Poland",
+    "cities": {
+      "Lodz": {
+        "municipalities": {
+          "Baluty": {
+            "parts": ["Kochanowka", "Romanow", "Teofilow", "Zabieniec", "Radigiszcz", "Julianow", "Stare Baluty",
+              "Zubardz", "Stare Miasto", "Helenow", "Doly", "Marysin Doly", "Marysin", "Rogi", "Lagiewniki",
+              "Wzniesienia Lodzkie"]
+          },
+          "Gorna": {
+            "parts": ["Laskowice", "Chocianowice", "Rokicie", "Ruda Pabianicka", "Nowe Rokicie", "Kurak", "Chojny",
+              "Gorniak", "Dabrowa", "Stare Chojyny", "Wiskitno"]
+          },
+          "Polesie": {
+            "parts": ["Zlotno", "Brus", "Zdrowie", "Smulsko", "Lublinek", "Nowe Sady", "Karolew", "Retkinia", "Koziny",
+              "Stare Polesie"]
+          },
+          "Srodmiescie": {
+            "parts": ["Centrum", "Fabryczna", "Radiostacja"]
+          },
+          "Widzew": {
+            "parts": ["Fabryczna Widziew", "Ksiezy Mlyn", "Stary Widzew", "Niciarniana", "Widzew Wschod", "Zarzew",
+            "Olechow", "Feliskin", "Andrzejow", "Mileszki", "Stoki", "Sikawa", "Stare Moskule", "Nowosolna"]
+
+          }
+        }
+      },
+      "Warsaw": {
+        "municipalities": {
+          "Srodmiescie": {
+
+          },
+          "Praga Poludnie": {
+
+          },
+          "Praga Polnoc": {
+
+          },
+          "Wola": {
+
+          },
+          "Ochota": {
+
+          },
+          "Mokotow": {
+
+          },
+          "Wawer": {
+
+          },
+          "Wesola": {
+
+          },
+          "Rembertow": {
+
+          },
+          "Targowek": {
+
+          },
+          "Zoliborz": {
+
+          },
+          "Bemowo": {
+
+          },
+          "Ursus": {
+
+          },
+          "Wlochy": {
+
+          },
+          "Ursynow": {
+
+          },
+          "Willanow": {
+
+          },
+          "Bialoleka": {
+
+          },
+          "Bielany": {
+
+          }
+        }
+      }
+    }
+  }
+]
