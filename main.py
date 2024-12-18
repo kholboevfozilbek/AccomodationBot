@@ -288,7 +288,31 @@ def search_accommodation(message):
             "added-date": None,
             "update-date": None,
             "verified": None,
-            "available": None
+            "available": None,
+            "energy-efficiency":{
+                "energy_rating": None, #(e.g, A+,B+,etc.)
+                "heating_type": None,  #(central,electric,underfloor)
+                "cooling_type": None,  #(air conditioning, ceiling fans)
+            },
+            "property-features":{
+                "view": None, #city,mountain,sea
+                "elevator": None, #yes/no
+                "fireplace": None,
+                "alarm_system": None,
+                "smart_home_technology": None,
+            },
+            "outdoor-features":{
+                "swimming_pool": None,
+                "jacuzzi": None,
+                "sauna": None,
+                "grill_area": None,
+                "private_entrance": None,
+            },
+            "location-specific-features":{
+                "neighborhood_quality": None,  #safe,upscale,developing
+                "crime_rate": None,  #low,medium,high
+                "noise_level": None,  #quiet,moderate,noisy
+            }
         }
     user_search_response[host_id]["selection_state"] = {"step": "country"}
 
