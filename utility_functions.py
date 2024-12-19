@@ -1,5 +1,7 @@
 import sqlite3
 import json
+import requests
+from datetime import datetime
 
 def convertToBinaryData(filename):
     # Convert digital data to binary format
@@ -254,3 +256,149 @@ def build_query(user_search_response, list_search_parameters):
 
     query = f"{base_query} {' AND '.join(filters)}"
     return query, values
+
+
+def send_photo_via_telegram(token, chat_id, image_path):
+    url = f"https://api.telegram.org/bot{token}/sendPhoto"
+    with open(image_path, 'rb') as photo_file:
+        response = requests.post(
+            url,
+            data={'chat_id': chat_id},
+            files={'photo': photo_file}
+        )
+    if response.status_code == 200:
+        print("Photo sent successfully:", response.json())
+    else:
+        print("Failed to send photo:", response.status_code, response.text)
+
+
+def get_kitchen_info(kitchen_data):
+    kitchen_available = "Yes" if kitchen_data.get("available") == 1 else "No"
+    kitchen_type = []
+    if kitchen_data.get("separate") == 1:
+        kitchen_type.append("Separate")
+    if kitchen_data.get("shared") == 1:
+        kitchen_type.append("Shared")
+
+    equipment = kitchen_data.get("equipment", [])
+    equipment_list = ", ".join(equipment) if equipment else "No equipment listed."
+
+    kitchen_info = (
+        f"\nDoes it have kitchen?: {kitchen_available}\n"
+        f"Type: {', '.join(kitchen_type) if kitchen_type else 'N/A'}\n"
+        f"Kitchen Equipment: {equipment_list}"
+    )
+    return kitchen_info
+
+
+def get_bathroom_info(bathroom_data):
+    bathroom_available = "Yes" if bathroom_data.get("available") == 1 else "No"
+    bathroom_type = "Shared" if bathroom_data.get("shared") else "Not shared"
+
+    bathroom_info = (
+        f"available? : {bathroom_available} \n"
+        f"Shared?: {bathroom_type}"
+    )
+    return bathroom_info
+
+
+def convert_to_yes_no(data):
+    return "Yes" if data else "No"
+
+
+def get_parking_info(parking_data):
+    if parking_data.get("available"):
+        price = parking_data.get("price", "N/A")
+        parking_type = parking_data.get("type", "N/A")
+        return f"Available\nType: {parking_type.capitalize()}\nPrice: {price} PLN"
+    else:
+        return "Not Available"
+
+
+def meters_to_km(meters):
+    """Convert meters to kilometers and format with 2 decimal points."""
+    try:
+        km = int(meters) / 1000  # Safe conversion to float
+        return f"{km:.2f} km"
+    except (TypeError, ValueError):
+        return "N/A"
+
+
+def get_bus_lines_info(bus_data):
+    if bus_data:
+        address = bus_data.get("address", "N/A")
+        lines = ", ".join(bus_data.get("lines", []))
+        distance = meters_to_km(bus_data.get("distance", '0'))
+        return f"\nBus station: {address}\nLines: {lines}\nDistance: {distance}"
+    return "No nearby bus stops available."
+
+
+def get_tram_lines_info(tram_data):
+    if tram_data:
+        address = tram_data.get("address", "N/A")
+        lines = ", ".join(map(str, tram_data.get("lines", [])))
+        distance = meters_to_km(tram_data.get('distance', '0'))
+        return f"\nTram station: {address}\nLines: {lines}\nDistance: {distance}"
+    return "No nearby tram stops available."
+
+
+def get_train_station_info(train_data):
+    if train_data:
+        stations_info = "\n".join(
+            [f"{station}: {meters_to_km(distance)}" for station, distance in train_data.items()]
+        )
+        return f"\nTrain Stations:\n{stations_info}"
+    return "No nearby train stations available."
+
+
+def get_touristic_places_info(places_data):
+    if places_data:
+        places_info = "\n".join(
+            [
+                f"* {place}: {round(int(distance) / 1000, 1)} km"
+                for place, distance in places_data.items()
+            ]
+        )
+        return f"\n{places_info}"
+    return "No touristic attractions nearby."
+
+
+def get_grocery_stores_info(stores_data):
+    if stores_data:
+        stores_info = "\n".join(
+            [
+                f"* {store}: {round(int(distance) / 1000, 1)} km"
+                for store, distance in stores_data.items()
+            ]
+        )
+        return f"\n{stores_info}"
+    return "No grocery stores nearby."
+
+
+def format_tags(tags):
+    if tags:
+        return " ".join([f"#{tag}" for tag in tags])
+    return "No tags available."
+
+
+def format_features(features):
+    if features and isinstance(features, list):  # Ensure it's a list
+        return "\n".join([f"* {feature.capitalize().strip()}" for feature in features])
+    return "None"
+
+
+def format_date(date_str):
+    try:
+        # Parse the date from the source string
+        date_obj = datetime.strptime(date_str, "%d.%m.%Y")
+        # Reformat the date into a more human-readable format
+        return date_obj.strftime("%B %d, %Y")  # Example: 'December 04, 2024'
+    except ValueError:
+        return date_str  # If the parsing fails, return the original string
+
+
+
+
+
+
+

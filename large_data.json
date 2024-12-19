@@ -27,12 +27,14 @@
         "rooms": 2,
         "room-equipment": ["TV", "Wardrobe", "Bathroom", "Furniture", "Washing Machine", "Gym", "Meeting Hall"],
         "kitchen": {
+            "available": 1,
             "separate": 1,
             "shared": 1,
             "equipment": ["fridge", "oven", "microwave", "stove", "pans"]
         },
         "bathroom": {
-            "shared": 0
+            "available": 1,
+            "shared": 1
         },
         "garden": 1,
         "reception_security": 1,
