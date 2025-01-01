@@ -249,7 +249,11 @@ def search_accommodation(message):
                     "internet": None
                 }
             },
-            "rooms": None,
+            "budget":{
+                "min_value": 0,
+                "max_value": 0,
+            },
+            "rooms": 0,
             "room-equipment": [],
             "kitchen": {
                 "separate": None,
@@ -600,7 +604,7 @@ def process_type_apartment_step(message):
             bot.register_next_step_handler(msg, process_price_step)
 
 
-def process_display_results_step(message, results, next_step_name, msg):
+def process_display_results_step(message, results, next_step_name, new_function_msg):
     host_id = message.chat.id
     user_choice = int(message.text)
 
@@ -651,7 +655,7 @@ def process_display_results_step(message, results, next_step_name, msg):
                     "\n\nGrocery Stores Nearby:" + utility_functions.get_grocery_stores_info(json.loads(result[28])) +
                     f"\n{utility_functions.format_tags(json.loads(result[29]))}" +
                     "\nFeatures:\n" + utility_functions.format_features(json.loads(result[30])) +
-                    "\nWould you like to continue?" + msg
+                    "\nWould you like to continue?" + new_function_msg
                 )
 
                 ### we also need to display apartment pictures
@@ -676,7 +680,7 @@ def process_display_results_step(message, results, next_step_name, msg):
         case 2:
             msg = bot.reply_to(
                 message,
-                "Please provide your budget: min-max"
+                new_function_msg
             )
             bot.register_next_step_handler(msg, next_step_name)
 
@@ -697,14 +701,109 @@ def process_price_step(message):
 
     budget = price_selection.split("-")
 
-    # check
+    if len(budget) != 2:
+        msg = bot.reply_to(
+            message,
+            "Incorrect format entered! Please provide your budget in the format 'min-max', e.g., 500-1000"
+        )
+        bot.register_next_step_handler(msg, process_price_step)
+        return
+    min_value = 0
+    max_value = 0
+    try:
+        min_value = int(budget[0].strip())
+        max_value = int(budget[1].strip())
+    except ValueError:
+        msg = bot.reply_to(
+            message,
+            "Invalid input! Both min and max should be numbers. Please try again, e.g., 500-1000."
+        )
+        bot.register_next_step_handler(msg, process_price_step)
+        return
 
-    # db query
+    if min_value < 0 or min_value > max_value:
+        msg = bot.reply_to(
+            message,
+            "Invalid range! Min should be less than or equal to Max, and both should be non-negative numbers."
+        )
+        bot.register_next_step_handler(msg, process_price_step)
+        return
+    user_search_response[host_id]["budget"] = {"min_value": min_value, "max_value": max_value}
 
+    query, values = utility_functions.build_query(user_search_response[host_id],
+                                                  ["country", "city", "municipality", "type", "budget"])
+    if query:
+        cursor.execute(query, values)
+        results = cursor.fetchall()
 
+        if results:
+            count = len(results)
+            msg = bot.reply_to(
+                message,
+                f"We found {count} matching apartments within your budget.\n"
+                "Would you like to:\n"
+                "1. See the listings\n"
+                "2. Narrow down your search further"
+            )
+            bot.register_next_step_handler(msg, process_display_results_step, results, process_number_rooms_step,
+                                           "Enter number of rooms you want")
+        else:
+            msg = bot.reply_to(
+                message,
+                "No matches found for this budget. Please enter the number of rooms you want."
+            )
+            bot.register_next_step_handler(msg, process_number_rooms_step)
+    else:
+        msg = bot.reply_to(
+            message,
+            "Unable to build a query. Please try again."
+        )
+        return
 
 def process_number_rooms_step(message):
-    print("hehe")
+    host_id = message.from_user.id
+    rooms_input =message.text
+    num_rooms = 0
+    try:
+        num_rooms = int(rooms_input.strip())
+        if num_rooms <= 0:
+            raise ValueError("Number of rooms must be positive integer!")
+    except ValueError:
+        msg = bot.reply_to(
+            message,
+            "Invalid input! Please enter a positive integer or number of rooms."
+        )
+        bot.register_next_step_handler(msg, process_number_rooms_step)
+        return
+    user_search_response[host_id]["rooms"] = num_rooms
+
+    query, values = utility_functions.build_query(user_search_response[host_id],
+                                                  ["country","city","municipality","type","budget","rooms"])
+    if query:
+        cursor.execute(query,values)
+        results = cursor.fetchall()
+
+        if results:
+            count = len(results)
+            msg = bot.reply_to(
+                message,
+                f"We found {count} matching apartments with {num_rooms} rooms.\n"
+                "Would you like to:\n"
+                "1.See the listings\n"
+                "2.Further narrow down your search"
+            )
+            bot.register_next_step_handler(msg, process_display_results_step,results )
+        else:
+            msg = bot.reply_to(
+                message,
+                f"No matches found for {num_rooms} rooms. Please try a different number of rooms"
+            )
+    else:
+        msg = bot.reply_to(
+            message,
+            "Unable to build a query the current parameters. Please try again."
+        )
+        bot.register_next_step_handler(msg, process_number_rooms_step)
 
 
 @bot.message_handler(commands=['list'])
