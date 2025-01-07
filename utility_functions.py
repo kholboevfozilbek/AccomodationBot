@@ -266,7 +266,22 @@ def build_query(user_search_response, list_search_parameters):
             if "rooms" in user_search_response and user_search_response["rooms"]:
                 filters.append("place_rooms = ?")
                 values.append(user_search_response["rooms"])
-
+        elif parameter == "parking":
+            if "parking" in user_search_response:
+                filters.append("JSON_EXTRACT(place_parking, '$.available') <= ?")
+                values.append(user_search_response["parking"])
+        elif parameter == "smoking":
+            if "smoking" in user_search_response and user_search_response["smoking"]:
+                filters.append("place_smoking = ?")
+                values.append(user_search_response["smoking"])
+        elif parameter == "pets":
+            if "pets" in user_search_response and user_search_response["pets"]:
+                filters.append("place_pets = ?")
+                values.append(user_search_response["pets"])
+        elif parameter == "balcony":
+            if "balcony" in user_search_response and user_search_response["balcony"]:
+                filters.append("place_balcony = ?")
+                values.append(user_search_response["balcony"])
     if not filters:
         return None, None
 
