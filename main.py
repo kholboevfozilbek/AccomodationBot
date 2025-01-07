@@ -269,11 +269,7 @@ def search_accommodation(message):
             "smoking": None,
             "pets": None,
             "music-party": None,
-            "parking": {
-                "available": None,
-                "price": None,
-                "type": None
-            },
+            "parking": None,
             "near-bus-lines": {
                 "address": None,
                 "lines": [],
@@ -692,7 +688,7 @@ def process_display_results_step(message, results, next_step_name, new_function_
                 "1: To see all entries for the parameters taken so far\n"
                 "2: To continue narrowing down your search"
             )
-            bot.register_next_step_handler(error_msg, process_display_results_step, results, next_step_name)
+            bot.register_next_step_handler(error_msg, process_display_results_step, results, next_step_name, new_function_msg)
 
 
 def process_price_step(message):
@@ -792,19 +788,233 @@ def process_number_rooms_step(message):
                 "1.See the listings\n"
                 "2.Further narrow down your search"
             )
-            bot.register_next_step_handler(msg, process_display_results_step,results )
+            bot.register_next_step_handler(msg, process_display_results_step,results, process_parking_step, "Do you want with parking spot?(Yes/No)")
         else:
             msg = bot.reply_to(
                 message,
-                f"No matches found for {num_rooms} rooms. Please try a different number of rooms"
+                f"No matches found for {num_rooms} rooms. Please write if you want parking spot?(Yes/No)"
             )
+            bot.register_next_step_handler(msg, process_parking_step)
     else:
         msg = bot.reply_to(
             message,
             "Unable to build a query the current parameters. Please try again."
         )
-        bot.register_next_step_handler(msg, process_number_rooms_step)
+        return
 
+def process_parking_step(message):
+    host_id = message.from_user.id
+    parking_input = message.text.strip().lower()
+    parking_option = None
+
+    try:
+        if parking_input in ["yes", "y"]:
+            parking_option = 1
+        elif parking_input in ["no", "n"]:
+            parking_option = 0
+        else:
+            raise ValueError("Invalid parking input! Please reply with 'yes' or 'no'.")
+    except ValueError:
+        msg = bot.reply_to(
+            message,
+            "Invalid parking input! Please reply with 'yes' if parking is required or 'no' if not."
+        )
+        bot.register_next_step_handler(msg, process_parking_step)
+        return
+    user_search_response[host_id]["parking"] = parking_option
+
+    query, values = utility_functions.build_query(user_search_response[host_id],
+                                                  ["country", "city", "municipality", "type", "budget", "rooms", "parking"])
+    if query:
+        cursor.execute(query, values)
+        results = cursor.fetchall()
+
+        if results:
+            count = len(results)
+            msg = bot.reply_to(
+                message,
+                f"We found {count} matching apartments with {'parking' if parking_option else 'no parking'}.\n"
+                "Would you like to:\n"
+                "1. See the listenings\n"
+                "2. Further narrow don your search"
+            )
+            bot.register_next_step_handler(msg, process_display_results_step, results, process_smoking_step, "Do you smoke?(Yes/No)")
+        else:
+            msg = bot.reply_to(
+                message,
+                f"No matches found for {'parking' if parking_option else 'no parking'}. "
+                "Please write if you want a availability for smoking? (Yes/No)"
+            )
+            bot.register_next_step_handler(msg, process_smoking_step)
+    else:
+        msg = bot.reply_to(
+            message,
+            "Unable to build a query with the current parameters. Please try again."
+        )
+        return
+
+
+def process_smoking_step(message):
+    host_id = message.from_user.id
+    smoking_input = message.text.strip().lower()
+
+    try:
+        if smoking_input in ["yes", "y"]:
+            smoking_allowed = True
+        elif smoking_input in ["no", "n"]:
+            smoking_allowed = False
+        else:
+            raise ValueError("Invalid input for smoking! Please reply with 'yes' or 'no'.")
+    except ValueError:
+        msg = bot.reply_to(
+            message,
+            "Invalid input! Please reply with 'yes' if smoking is allowed or 'no' if not."
+        )
+        bot.register_next_step_handler(msg, process_smoking_step)
+        return
+
+    user_search_response[host_id]["smoking"] = smoking_allowed
+
+    query, values = utility_functions.build_query(user_search_response[host_id],
+                                                  ["country", "city", "municipality", "type", "budget", "rooms", "parking", "smoking"])
+    if query:
+        cursor.execute(query, values)
+        results = cursor.fetchall()
+
+        if results:
+            count = len(results)
+            msg = bot.reply_to(
+                message,
+                f"We found {count} matching apartments with smoking {'allowed' if smoking_allowed else 'not allowed'}.\n"
+                "Would you like to:\n"
+                "1. See the listings\n"
+                "2. Further narrow down your search"
+            )
+            bot.register_next_step_handler(msg, process_display_results_step, results, process_pets_step, "Will you be with pets?(Yes/No)")
+        else:
+            msg = bot.reply_to(
+                message,
+                f"No matches found for smoking {'allowed' if smoking_allowed else 'not allowed'}. "
+                "Please write if you want a availability for pets?(Yes/No)"
+            )
+            bot.register_next_step_handler(msg, process_pets_step)
+    else:
+        msg = bot.reply_to(
+            message,
+            "Unable to build a query with the current parameters. Please try again."
+        )
+        return
+
+def process_pets_step(message):
+    host_id = message.from_user.id
+    pets_input = message.text.strip().lower()
+    pets_option = None
+
+    try:
+        if pets_input in ["yes", "y"]:
+            pets_option = True
+        elif pets_input in ["no", "n"]:
+            pets_option = False
+        else:
+            raise ValueError("Invalid input! Please reply with 'yes' or 'no'.")
+    except ValueError:
+        msg = bot.reply_to(
+            message,
+            "Invalid input! Please reply with 'yes' if you require a pet-friendly accommodation or 'no' otherwise."
+        )
+        bot.register_next_step_handler(msg, process_pets_step)
+        return
+
+    user_search_response[host_id]["pets"] = pets_option
+
+
+    query, values = utility_functions.build_query(user_search_response[host_id],
+                                                  ["country", "city", "municipality", "type", "budget", "rooms", "parking", "pets"])
+    if query:
+        cursor.execute(query, values)
+        results = cursor.fetchall()
+
+        if results:
+            count = len(results)
+            msg = bot.reply_to(
+                message,
+                f"We found {count} matching apartments that are {'pet-friendly' if pets_option else 'not pet-friendly'}.\n"
+                "Would you like to:\n"
+                "1. See the listings\n"
+                "2. Further narrow down your search"
+            )
+            bot.register_next_step_handler(msg, process_display_results_step, results, process_balcony_step, "Do you want with balcony?(Yes/No)")
+        else:
+            msg = bot.reply_to(
+                message,
+                f"No matches found for {'pet-friendly' if pets_option else 'not pet-friendly'} accommodations. "
+                "Would you like to have a balcony?(Yes/No)"
+            )
+            bot.register_next_step_handler(msg, process_balcony_step)
+    else:
+        msg = bot.reply_to(
+            message,
+            "Unable to build a query with the current parameters. Please try again."
+        )
+        return
+
+
+def process_balcony_step(message):
+    host_id = message.from_user.id
+    balcony_input = message.text.strip().lower()
+    balcony_option = None
+
+    try:
+        if balcony_input in ["yes", "y"]:
+            balcony_option = True
+        elif balcony_input in ["no", "n"]:
+            balcony_option = False
+        else:
+            raise ValueError("Invalid input! Please reply with 'yes' or 'no'.")
+    except ValueError:
+        msg = bot.reply_to(
+            message,
+            "Invalid input! Please reply with 'yes' if you require a balcony or 'no' otherwise."
+        )
+        bot.register_next_step_handler(msg, process_balcony_step)
+        return
+
+    # Store the balcony preference in user search response
+    user_search_response[host_id]["balcony"] = balcony_option
+
+    # Build the query to include balcony preference
+    query, values = utility_functions.build_query(user_search_response[host_id],
+                                                  ["country", "city", "municipality", "type", "budget", "rooms", "parking", "pets", "balcony"])
+    if query:
+        cursor.execute(query, values)
+        results = cursor.fetchall()
+
+        if results:
+            count = len(results)
+            msg = bot.reply_to(
+                message,
+                f"We found {count} matching apartments that {'have a balcony' if balcony_option else 'do not have a balcony'}.\n"
+                "Would you like to:\n"
+                "1. See the listings\n"
+                "2. Further narrow down your search"
+            )
+            bot.register_next_step_handler(msg, process_display_results_step, results, process_touristic_step, "Which touristic place you need to have nearby?")
+        else:
+            msg = bot.reply_to(
+                message,
+                f"No matches found for apartments that {'have a balcony' if balcony_option else 'do not have a balcony'}. "
+                "Which touristic place you need to have nearby?"
+            )
+            bot.register_next_step_handler(msg, process_touristic_step)  # Re-register to refine search
+    else:
+        msg = bot.reply_to(
+            message,
+            "Unable to build a query with the current parameters. Please try again."
+        )
+        return
+
+def process_touristic_step(message):
+    print("hehe")
 
 @bot.message_handler(commands=['list'])
 def list_accommodations(message):
@@ -851,3 +1061,7 @@ if __name__ == "__main__":
     # utility_functions.parse_and_store(json_file_path, db_name, photos)
     utility_functions.fetch_and_display_all_data("users.db")
     bot.polling(timeout=10, long_polling_timeout=5)
+
+
+##output to the user: We print to the user "In your chosen {city} we have following touristic places"   following touristic places = list of places in city
+## input from user: str e.g "Manufaktura"
