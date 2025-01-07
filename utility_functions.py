@@ -250,6 +250,22 @@ def build_query(user_search_response, list_search_parameters):
             if "type" in user_search_response and user_search_response["type"]:
                 filters.append("place_type = ?")
                 values.append(user_search_response["type"])
+        elif parameter == "budget":
+            if "budget" in user_search_response and user_search_response["budget"]:
+                min_budget = user_search_response["budget"].get("min_value")
+                max_budget = user_search_response["budget"].get("max_value")
+
+                if min_budget is not None:
+                    filters.append("JSON_EXTRACT(place_price, '$.base') >= ?")
+                    values.append(min_budget)
+
+                if max_budget is not None:
+                    filters.append("JSON_EXTRACT(place_price, '$.base') <= ?")
+                    values.append(max_budget)
+        elif parameter == "rooms":
+            if "rooms" in user_search_response and user_search_response["rooms"]:
+                filters.append("place_rooms = ?")
+                values.append(user_search_response["rooms"])
 
     if not filters:
         return None, None
